@@ -5,7 +5,16 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
-const db = mongoose.connection;
+
+const Schema = mongoose.Schema
+
+let userSchema = new Schema({
+    email: String,
+    name: String,
+    password: String
+});
+
+let User = mongoose.model('User', userSchema);
 
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
@@ -17,40 +26,88 @@ app.use(session({
   saveUninitialized: true,
 }));
 
+
+// 기본 화면
 app.get('/', (req, res) => {
     res.render('index.ejs');
 });
 
+
+// 로그인
 app.get('/signin', (req, res) => {
+    if (req.session.name) {
+        res.render('index.ejs');
+    }
     res.render('signin.ejs');
 });
 
+app.post('/signin', (req, res) => {
+    let signinUser = {
+        email: req.body.email,
+        password: req.body.password
+    };
+    
+    User.findOne({ email: signinUser.email }, (err, user) => {
+        if (err) {
+            console.log(err);
+        }
+        
+        if (!user) {
+            console.log('cannot find user.');
+            return res.render('signin.ejs');
+        }
+        
+        if (signinUser.password !== user.password) {
+            return res.render('signin.ejs');
+        }
+        
+        req.session.email = user.email;
+        req.session.name = user.name;
+        
+        req.session.save(() => {
+            res.redirect('/');
+        });
+    });
+});
+
+
+// 회원가입
 app.get('/signup', (req, res) => {
     res.render('signup.ejs');
 });
 
-app.post('/signin', (req, res) => {
-    
-});
 app.post('/signup', (req, res) => {
-    let user = {
+    let user = new User({
         email: req.body.email,
         name: req.body.name,
-        age: req.body.age,
         password: req.body.password
-    };
+    });
     
-    console.log(user);
+    user.save(err => {
+        if (err) {
+            conosle.log(err);
+        }
+        
+        res.redirect('/signin');
+    });
 });
 
-io.on('connection', socket => {
-    console.log('user conneted.');
+
+// 로그아웃
+app.get('/signout', (req, res) => {
+    req.session.destroy();
+    res.render('signin.ejs');
 });
+
+app.get('/file', (req, res) => {
+    res.send('file');
+});
+
+app.get('/chat', (req, res) => {
+    res.send('chat');
+})
 
 http.listen(3000, () => {
     console.log('listen on port: 3000.');
-    db.on('error', console.error);
-    db.once('open', () => {
-        console.log('conneted with mongoose');
-    });
+    mongoose.connect('mongodb://localhost/database', { useMongoClient: true });
 });
