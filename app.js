@@ -6,15 +6,25 @@ const mongoose = require('mongoose');
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
 
-const Schema = mongoose.Schema
+const Schema = mongoose.Schema;
+const ObjectId = Schema.ObjectId;
 
 let userSchema = new Schema({
+	id: ObjectId,
     email: String,
     name: String,
     password: String
 });
 
+let chatSchema = new Schema({
+	id: ObjectId,
+	email: String,
+	name: String,
+	message: String
+});
+
 let User = mongoose.model('User', userSchema);
+let Chat = mongoose.model('Chat', chatSchema);
 
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
@@ -27,7 +37,7 @@ app.use(session({
 }));
 
 
-// 기본 화면
+// 기본 페이지
 app.get('/', (req, res) => {
     if (req.session.user) {
         res.render('index.ejs', { user: req.session.user });
@@ -36,14 +46,18 @@ app.get('/', (req, res) => {
     }
 });
 
+
+// 환영 페이지
 app.get('/welcome', (req, res) => {
     res.render('welcome.ejs', { user: req.session.user });
 });
 
 
+// 마이 페이지
 app.get('/my', (req, res) => {
     res.render('my.ejs', { user: req.session.user });
 });
+
 
 // 로그인
 app.get('/signin', (req, res) => {
@@ -121,6 +135,29 @@ app.get('/file', (req, res) => {
 app.get('/chat', (req, res) => {
 	if (req.session.user) {
 		res.render('chat.ejs', { user: req.session.user });
+		io.on('connection', socket => {
+			socket.on('login', data => {
+				console.log('hi2');
+				console.log(`${ data.name }(${ data.email}) connected.`);
+				socket.name = data.name;
+				socket.email = data.email;
+				io.emit('login', data.name);
+			});
+			
+			socket.on('chat', data => {
+				console.log(`${ socket.name }: ${ data.message }`);
+			});
+			
+			let message = {
+				from: {
+					name: socket.name,
+					email: socket.email
+				},
+				message: data.message
+			};
+			
+			socket.broadcast.emit('chat', message);
+		});
 	} else {
 		res.render('signin.ejs');
 	}
