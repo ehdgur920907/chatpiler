@@ -32,9 +32,10 @@
                 <ul class="nav navbar-nav">
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
+                    <li><a href="/file">file</a></li>
+                    <li><a href="/chat">chat</a></li>
+                    <li><a href="/my">my</a></li>
                     <li><a href="/signout">signout</a></li>
-                    <li><a href="/signin">signin</a></li>
-                    <li><a href="/signup">signup</a></li>
                 </ul>
             </div>
             <!-- /.navbar-collapse -->
@@ -42,12 +43,14 @@
         <!-- /.container-fluid -->
     </nav>
     <div class="container">
-        <h1>Hello!
-            <%= name %>
-        </h1>
-        <h2>email:
-            <%= email %>
-        </h2>
+		<div class="jumbotron">
+			<h1>hello, <%= user.name %>!</h1>
+			<p>this is a simple file manager and chat service. <br />upload what you want to upload, chat what you want to chat.</p>
+			<br />
+			<a class="btn btn-info btn-lg" href="/file" role="button">Go file manager!</a>
+			&nbsp;&nbsp;&nbsp;
+			<a class="btn btn-primary btn-lg" href="/chat" role="button">Go chat service!</a>			
+		</div>
     </div>
 </body>
 

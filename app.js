@@ -29,15 +29,24 @@ app.use(session({
 
 // 기본 화면
 app.get('/', (req, res) => {
-    res.render('index.ejs');
+    if (req.session.user) {
+        res.render('index.ejs', { user: req.session.user });
+    } else {
+        res.render('index.ejs');
+    }
+});
+
+app.get('/welcome', (req, res) => {
+    res.render('welcome.ejs', { user: req.session.user });
 });
 
 
+app.get('/my', (req, res) => {
+    res.render('my.ejs', { user: req.session.user });
+});
+
 // 로그인
 app.get('/signin', (req, res) => {
-    if (req.session.name) {
-        res.render('index.ejs');
-    }
     res.render('signin.ejs');
 });
 
@@ -61,11 +70,9 @@ app.post('/signin', (req, res) => {
             return res.render('signin.ejs');
         }
         
-        req.session.email = user.email;
-        req.session.name = user.name;
-        
+        req.session.user = user;
         req.session.save(() => {
-            res.redirect('/');
+            res.redirect('/welcome');
         });
     });
 });
@@ -96,15 +103,27 @@ app.post('/signup', (req, res) => {
 // 로그아웃
 app.get('/signout', (req, res) => {
     req.session.destroy();
-    res.render('signin.ejs');
+    res.redirect('/');
 });
 
+
+// 파일
 app.get('/file', (req, res) => {
-    res.send('file');
+	if (req.session.user) {
+		res.render('file.ejs', { user: req.session.user });
+	} else {
+		res.render('signin.ejs');
+	}
 });
 
+
+// 채팅
 app.get('/chat', (req, res) => {
-    res.send('chat');
+	if (req.session.user) {
+		res.render('chat.ejs', { user: req.session.user });
+	} else {
+		res.render('signin.ejs');
+	}
 })
 
 http.listen(3000, () => {

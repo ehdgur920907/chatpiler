@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>signin</title>
+    <title>my</title>
     <!-- jQuery CDN -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 
@@ -29,13 +29,17 @@
 
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                </ul>
                 <ul class="nav navbar-nav navbar-right">
                     <li><a href="/file">file</a></li>
                     <li><a href="/chat">chat</a></li>
                     <li><a href="/my">my</a></li>
                     <li><a href="/signout">signout</a></li>
-                    <li><a href="/signin">signin</a></li>
-                    <li><a href="/signup">signup</a></li>
+                    <% if (!user) { %>
+                        <li><a href="/signin">signin</a></li>
+                        <li><a href="/signup">signup</a></li>
+                    <% } %>
                 </ul>
             </div>
             <!-- /.navbar-collapse -->
@@ -45,16 +49,26 @@
     <div class="container">
         <div class="col-md-6 col-md-offset-3">
             <div class="jumbotron">
-                <form action="/signin" method="post">
-                    <div class="form-group">
-                        <label for="email">email</label> <input type="emai
-                        l" class="form-control" name="email" id="email" placeholder="email">
-                    </div>
-                    <div class="form-group">
-                        <label for="password">password</label> <input type="password" class="form-control" name="password" id="password" placeholder="password">
-                    </div>
-                    <button type="submit" class="btn btn-primary">signin</button>
-                </form>
+                <h2 style="text-align: center;">my information</h2>
+                <hr>
+                <table class="table table-bordered" style="background-color: white;">
+                    <thead>
+                        <tr>
+                            <th>email</th>
+                            <td>
+                                <%= user.email %>
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th>name</th>
+                            <td>
+                                <%= user.name %>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
