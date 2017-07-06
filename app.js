@@ -104,6 +104,17 @@ app.post('/signup', (req, res) => {
         password: req.body.password
     });
     
+	User.findOne({ email: req.body.email }, (err, user) => {
+		if (err) {
+			console.log(err);
+		}
+		
+		if (user) {
+			console.log('your email is already on.');
+			return res.render('signup.ejs')
+		}
+	});
+	
     user.save(err => {
         if (err) {
             conosle.log(err);
@@ -135,28 +146,40 @@ app.get('/file', (req, res) => {
 app.get('/chat', (req, res) => {
 	if (req.session.user) {
 		res.render('chat.ejs', { user: req.session.user });
+		
+		let message = {
+			from: {
+				name: "",
+				email: ""
+			},
+			message: ""
+		};
+		
 		io.on('connection', socket => {
 			socket.on('login', data => {
-				console.log('hi2');
-				console.log(`${ data.name }(${ data.email}) connected.`);
 				socket.name = data.name;
 				socket.email = data.email;
 				io.emit('login', data.name);
 			});
 			
 			socket.on('chat', data => {
-				console.log(`${ socket.name }: ${ data.message }`);
+				let message = {
+					from: {
+						name: socket.name,
+						email: socket.email
+					},
+					message: data.message
+				};
+				console.log(message);
+				io.emit('chat', message);
 			});
 			
-			let message = {
-				from: {
-					name: socket.name,
-					email: socket.email
-				},
-				message: data.message
-			};
-			
-			socket.broadcast.emit('chat', message);
+			socket.on('forceDisconnect', () => {
+				socket.disconnect();
+			});	
+			socket.on('disconnect', () => {
+				console.log(`${ socket.name } disconnected.`);
+			});
 		});
 	} else {
 		res.render('signin.ejs');

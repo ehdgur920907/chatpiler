@@ -47,6 +47,7 @@
 		</div>
 		<!-- /.container-fluid -->
 	</nav>
+	
 	<div class="container">
 		<div class="jumbotron" style="width: 50%; margin: auto;">
 			<div class="row">
@@ -54,7 +55,7 @@
 					<div class="panel-heading">
 						<span class="glyphicon glyphicon-comment"></span>&nbsp;&nbsp;chat (<span id="user-count"></span>)
 					</div>
-					<div class="panel-body">
+					<div class="panel-body" style="word-break: break-all; word-wrap: break-word;">
 						<ul class="chat">
 							<li>welcome to chat service.</li>
 						</ul>
@@ -72,22 +73,20 @@
 			</div>
 		</div>
 	</div>
+	<input type="hidden" id="user-email" value="<%= user.email %>">
+	<input type="hidden" id="user-name" value="<%= user.name %>">
 </body>
 <script>
 	$(() => {
 		const socket = io.connect();
 
 		socket.emit('login', {
-			name: 'donghyuk',
-			email: 'ehdgur920907@gmail.com'
+			email: $('#user-email').val(),
+			name: $('#user-name').val()
 		});
 
 		socket.on('login', data => {
 			$('.chat').append(`<li>${ data } has joined.</li>`);
-		});
-
-		socket.on('chat', data => {
-			$('.chat').append(`<li>${ data.from.name }: ${ data.message }</li>`);
 		});
 
 		$('#btn-chat').click(e => {
@@ -96,6 +95,11 @@
 				message: $('#btn-input').val()
 			});
 			$('#btn-input').val("");
+		});
+		
+		socket.on('chat', data => {
+			console.log('here');
+			$('.chat').append(`<li><strong>${ data.from.name }</strong>: ${ data.message }</li>`);
 		});
 	});
 </script>
