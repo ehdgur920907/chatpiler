@@ -55,14 +55,14 @@
 					<div class="panel-heading">
 						<span class="glyphicon glyphicon-comment"></span>&nbsp;&nbsp;chat (<span id="user-count"></span>)
 					</div>
-					<div class="panel-body" style="word-break: break-all; word-wrap: break-word;">
-						<ul class="chat">
+					<div class="panel-body" style="word-break: break-all; word-wrap: break-word; height: 300px; overflow: auto;">
+						<ul class="chat" style="list-style: none;">
 							<li>welcome to chat service.</li>
 						</ul>
 					</div>
 					<div class="panel-footer">
 						<div class="input-group">
-							<input id="btn-input" type="text" class="form-control input-sm" placeholder="type your message.">
+							<input id="btn-input" type="text" class="form-control input-sm" placeholder="type your message." autofocus>
 							<span class="input-group-btn">
                             <button class="btn btn-warning btn-sm" id="btn-chat">
                                 send</button>
@@ -86,11 +86,11 @@
 		});
 
 		socket.on('login', data => {
-			$('.chat').append(`<li>${ data } has joined.</li>`);
+			$('.chat').append(`<li style="color: red;"><strong>${ data }</strong> has joined.</li>`);
 		});
-
+		
 		$('#btn-chat').click(e => {
-			e.preventDefault();
+			e.stopPropagation();
 			socket.emit('chat', {
 				message: $('#btn-input').val()
 			});
@@ -98,8 +98,28 @@
 		});
 		
 		socket.on('chat', data => {
-			console.log('here');
-			$('.chat').append(`<li><strong>${ data.from.name }</strong>: ${ data.message }</li>`);
+			if (data.from.email === $('#user-email').val()) {
+				$('.chat').append(`<li style="color: blue;"><strong>${ data.from.name }</strong>: ${ data.message }</li>`);
+				$('.panel-body').scrollTop(0);
+				console.log('master');
+			} else {
+				$('.chat').append(`<li><strong>${ data.from.name }</strong>: ${ data.message }</li>`);
+				$('.panel-body').scrollTop(0);
+				console.log('slave');
+			}
+		});
+		
+		$('#btn-input').keydown(key => {
+			if (key.keyCode === 13) {
+				if ($('#btn-input').val().length === 0) {
+					alert('input more than 1 words.');
+				} else {
+					socket.emit('chat', {
+						message: $('#btn-input').val()
+					});
+					$('#btn-input').val("");	
+				}
+			}
 		});
 	});
 </script>

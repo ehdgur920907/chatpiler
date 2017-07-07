@@ -80,6 +80,7 @@ app.post('/signin', (req, res) => {
             return res.render('signin.ejs');
         }
         
+		console.log(user);
         if (signinUser.password !== user.password) {
             return res.render('signin.ejs');
         }
@@ -147,14 +148,6 @@ app.get('/chat', (req, res) => {
 	if (req.session.user) {
 		res.render('chat.ejs', { user: req.session.user });
 		
-		let message = {
-			from: {
-				name: "",
-				email: ""
-			},
-			message: ""
-		};
-		
 		io.on('connection', socket => {
 			socket.on('login', data => {
 				socket.name = data.name;
@@ -170,7 +163,6 @@ app.get('/chat', (req, res) => {
 					},
 					message: data.message
 				};
-				console.log(message);
 				io.emit('chat', message);
 			});
 			
