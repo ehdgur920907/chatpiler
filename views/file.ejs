@@ -51,6 +51,13 @@
 			<div class="jumbotron">
 				<h2 style="text-align: center;">file manager</h2>
 				<hr>
+				<form action="/file", method="post", enctype="multipart/form-data">
+					<div class="form-group">
+						<label for="file">file input</label>
+						<input type="file" name="file">
+					</div>
+					<button type="submit" class="btn btn-primary">submit</button>
+				</form>
 			</div>
 		</div>
 	</div>

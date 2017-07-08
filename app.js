@@ -3,11 +3,27 @@ const session = require('express-session');
 const path = require('path');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const mkdirp = require('mkdirp');
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
+const fs = require('fs');
+const multer = require('multer');
 
 const Schema = mongoose.Schema;
 const ObjectId = Schema.ObjectId;
+
+let login_ids = {};
+
+let storage = multer.diskStorage({
+	destination: (req, file, cb) => {
+		cb(null, `${ req.session.user.email}/def`);
+	},
+	filename: (req, file, cb) => {
+		cb(null, file.originalname);
+	}
+});
+		
+const upload = multer({ storage });
 
 let userSchema = new Schema({
 	id: ObjectId,
@@ -26,6 +42,7 @@ let chatSchema = new Schema({
 let User = mongoose.model('User', userSchema);
 let Chat = mongoose.model('Chat', chatSchema);
 
+process.setMaxListeners(0);
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 
@@ -80,7 +97,6 @@ app.post('/signin', (req, res) => {
             return res.render('signin.ejs');
         }
         
-		console.log(user);
         if (signinUser.password !== user.password) {
             return res.render('signin.ejs');
         }
@@ -136,10 +152,20 @@ app.get('/signout', (req, res) => {
 // 파일
 app.get('/file', (req, res) => {
 	if (req.session.user) {
-		res.render('file.ejs', { user: req.session.user });
+		res.render('file.ejs', { user: req.session.user, });
+		
+		mkdirp(`./${ req.session.user.email }/def`, err => {
+			if (err) {
+				conosle.log(err);
+			}
+		});
 	} else {
 		res.render('signin.ejs');
 	}
+});
+
+app.post('/file', upload.single('file'), (req, res) => {
+	console.log(req.file);
 });
 
 
@@ -150,27 +176,41 @@ app.get('/chat', (req, res) => {
 		
 		io.on('connection', socket => {
 			socket.on('login', data => {
+				login_ids[data.name] = socket.id;
+				socket.login_id = data.name;
 				socket.name = data.name;
 				socket.email = data.email;
-				io.emit('login', data.name);
+				socket.broadcast.emit('login', socket.name);
+			});
+			
+			socket.on('disconnect', () => {
+				socket.broadcast.emit('logout', socket.name);
+				socket.disconnect();
 			});
 			
 			socket.on('chat', data => {
-				let message = {
-					from: {
-						name: socket.name,
-						email: socket.email
-					},
-					message: data.message
-				};
-				io.emit('chat', message);
-			});
-			
-			socket.on('forceDisconnect', () => {
-				socket.disconnect();
-			});	
-			socket.on('disconnect', () => {
-				console.log(`${ socket.name } disconnected.`);
+				if (data.name === 'all') {
+					let message = {
+						from: {
+							name: socket.name,
+							email: socket.email
+						},
+						message: data.message
+					};
+					io.emit('chat', message);
+				} else {
+					console.log(data);
+					console.log(login_ids);
+					if (login_ids[data.name]) {
+						let message = {
+							from: {
+								name: data.name
+							},
+							message: data.message
+						}
+						io.sockets.connected[login_ids[data.name]].emit('whisper', message);
+					}
+				}
 			});
 		});
 	} else {

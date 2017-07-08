@@ -57,14 +57,18 @@
 					</div>
 					<div class="panel-body" style="word-break: break-all; word-wrap: break-word; height: 300px; overflow: auto;">
 						<ul class="chat" style="list-style: none;">
-							<li>welcome to chat service.</li>
+							<h4>welcome to chat service.</h4>
+							<hr />
 						</ul>
 					</div>
 					<div class="panel-footer">
 						<div class="input-group">
-							<input id="btn-input" type="text" class="form-control input-sm" placeholder="type your message." autofocus>
+							<select class="form-control" id="select-box">
+							  <option>all</option>
+							</select>
+							<input id="btn-input" type="text" class="form-control " placeholder="type your message." autofocus>
 							<span class="input-group-btn">
-                            <button class="btn btn-warning btn-sm" id="btn-chat">
+                            <button class="btn btn-warning btn" id="btn-chat">
                                 send</button>
                         </span>
 						</div>
@@ -86,27 +90,47 @@
 		});
 
 		socket.on('login', data => {
-			$('.chat').append(`<li style="color: red;"><strong>${ data }</strong> has joined.</li>`);
+			$('.chat').append(`<li style="color: red;"><span class="whisper" style="cursor: pointer"><strong>${ data }</strong></span> has joined.</li>`);
 		});
 		
-		$('#btn-chat').click(e => {
-			e.stopPropagation();
-			socket.emit('chat', {
-				message: $('#btn-input').val()
-			});
-			$('#btn-input').val("");
+		$('#btn-chat').click(() => {
+			if ($('#btn-input').val().length === 0) {
+				alert('input more than 1 words.');
+			} else {
+				if ($('#select-box').val() === 'all') {
+					socket.emit('chat', {
+						to: 'all',
+						message: $('#btn-input').val()
+					});
+					$('#btn-input').val("");
+				} else {
+					socket.emit('chat', {
+						to: $('#select-box').val(),
+						message: $('#btn-input').val()
+					});
+					$('#btn-input').val("");
+				}
+			}
 		});
 		
 		socket.on('chat', data => {
 			if (data.from.email === $('#user-email').val()) {
-				$('.chat').append(`<li style="color: blue;"><strong>${ data.from.name }</strong>: ${ data.message }</li>`);
-				$('.panel-body').scrollTop(0);
-				console.log('master');
+				$('.chat').append(`<li style="color: blue;"><span style="cursor: pointer"><strong>${ data.from.name }</span></strong>: ${ data.message }</li>`);
+//				$('.panel-body').scrollTop(0);
+//				console.log('master');
 			} else {
-				$('.chat').append(`<li><strong>${ data.from.name }</strong>: ${ data.message }</li>`);
-				$('.panel-body').scrollTop(0);
-				console.log('slave');
+				$('.chat').append(`<li><strong><span class="whisper" style="cursor: pointer">${ data.from.name }</span></strong>: ${ data.message }</li>`);
+//				$('.panel-body').scrollTop(0);
+//				console.log('slave');
 			}
+		});
+		
+		socket.on('whisper', data => {
+			$('.chat').append(`<li style="color: gray;"><strong><span class="whisper" style="cursor: pointer">${ data.from.name }'s whisper: </span></strong>${ data.message }</li>`);
+		});
+		
+		socket.on('logout', data => {
+			$('.chat').append(`<li style="color: red;"><span style="cursor: pointer"><strong>${ data }</strong></span> has left.</li>`);
 		});
 		
 		$('#btn-input').keydown(key => {
@@ -114,12 +138,25 @@
 				if ($('#btn-input').val().length === 0) {
 					alert('input more than 1 words.');
 				} else {
-					socket.emit('chat', {
-						message: $('#btn-input').val()
-					});
-					$('#btn-input').val("");	
+					if ($('#select-box').val() === 'all') {
+						socket.emit('chat', {
+							name: 'all',
+							message: $('#btn-input').val()
+						});
+						$('#btn-input').val("");
+					} else {
+						socket.emit('chat', {
+							name: $('#select-box').val(),
+							message: $('#btn-input').val()
+						});
+						$('#btn-input').val("");
+					}
 				}
 			}
+		});
+		
+		$('.chat').on('click', '.whisper', () => {
+			$('#select-box').append(`<option>${ $(this).text() }</option>`);
 		});
 	});
 </script>
