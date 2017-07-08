@@ -9,6 +9,7 @@ const io = require('socket.io')(http);
 const fs = require('fs');
 const multer = require('multer');
 
+mongoose.Promise = global.Promise;
 const Schema = mongoose.Schema;
 const ObjectId = Schema.ObjectId;
 
@@ -176,16 +177,16 @@ app.get('/chat', (req, res) => {
 	if (req.session.user) {
 		res.render('chat.ejs', { user: req.session.user });
 		
-		io.on('connection', socket => {
+		io.once('connection', socket => {
 			socket.on('login', data => {
 				login_ids[data.nickname] = socket.id;
 				socket.login_id = data.nickname;
 				socket.nickname = data.nickname;
-				socket.email = data.email;
-				socket.broadcast.emit('login', socket.nickname);
+				socket.broadcast.emit('login', data.nickname);
 			});
 			
-			socket.on('disconnect', () => {
+			socket.on('disconnect', (data) => {
+				delete login_ids[socket.nickname];
 				socket.broadcast.emit('logout', socket.nickname);
 				socket.disconnect();
 			});
@@ -194,8 +195,7 @@ app.get('/chat', (req, res) => {
 				if (data.to === 'all') {
 					let message = {
 						from: {
-							name: socket.name,
-							email: socket.email
+							nickname: socket.nickname,
 						},
 						message: data.message
 					};
@@ -208,7 +208,7 @@ app.get('/chat', (req, res) => {
 							},
 							message: data.message
 						}
-						io.sockets.connected[login_ids[data.nickname]].emit('whisper', message);
+						io.sockets.connected[login_ids[data.to]].emit('whisper', message);
 					}
 				}
 			});

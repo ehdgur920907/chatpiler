@@ -49,7 +49,7 @@
 	</nav>
 	
 	<div class="container">
-		<div class="jumbotron" style="width: 50%; margin: auto;">
+		<div class="jumbotron" style="width: 70%; margin: auto;">
 			<div class="row">
 				<div class="panel panel-primary">
 					<div class="panel-heading">
@@ -80,7 +80,6 @@
 			</div>
 		</div>
 	</div>
-	<input type="hidden" id="user-email" value="<%= user.email %>">
 	<input type="hidden" id="user-nickname" value="<%= user.nickname %>">
 </body>
 <script>
@@ -88,11 +87,11 @@
 		const socket = io.connect();
 
 		socket.emit('login', {
-			email: $('#user-email').val(),
 			nickname: $('#user-nickname').val()
 		});
-
+		
 		socket.on('login', data => {
+			console.log('how many login request?');
 			$('.chat').append(`<li style="color: red;"><span class="whisper" style="cursor: pointer"><strong>${ data }</strong></span> has joined.</li>`);
 		});
 		
@@ -135,6 +134,7 @@
 		socket.on('logout', data => {
 			$('.chat').append(`<li style="color: red;"><span style="cursor: pointer"><strong>${ data }</strong></span> has left.</li>`);
 		});
+		
 		
 		$('#btn-input').keydown(key => {
 			if (key.keyCode === 13) {
