@@ -28,21 +28,12 @@ const upload = multer({ storage });
 let userSchema = new Schema({
 	id: ObjectId,
     email: String,
-    name: String,
+    nickname: String,
     password: String
 });
 
-let chatSchema = new Schema({
-	id: ObjectId,
-	email: String,
-	name: String,
-	message: String
-});
-
 let User = mongoose.model('User', userSchema);
-let Chat = mongoose.model('Chat', chatSchema);
 
-process.setMaxListeners(0);
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 
@@ -117,7 +108,7 @@ app.get('/signup', (req, res) => {
 app.post('/signup', (req, res) => {
     let user = new User({
         email: req.body.email,
-        name: req.body.name,
+        nickname: req.body.nickname,
         password: req.body.password
     });
     
@@ -129,6 +120,17 @@ app.post('/signup', (req, res) => {
 		if (user) {
 			console.log('your email is already on.');
 			return res.render('signup.ejs')
+		}
+	});
+	
+	User.findOne({ nickname: req.body.nickname }, (err, user) => {
+		if (err) {
+			console.log(err);
+		}
+		
+		if (user) {
+			console.log('your nickname is already on.');
+			return res.render('signup.ejs');
 		}
 	});
 	
@@ -176,20 +178,20 @@ app.get('/chat', (req, res) => {
 		
 		io.on('connection', socket => {
 			socket.on('login', data => {
-				login_ids[data.name] = socket.id;
-				socket.login_id = data.name;
-				socket.name = data.name;
+				login_ids[data.nickname] = socket.id;
+				socket.login_id = data.nickname;
+				socket.nickname = data.nickname;
 				socket.email = data.email;
-				socket.broadcast.emit('login', socket.name);
+				socket.broadcast.emit('login', socket.nickname);
 			});
 			
 			socket.on('disconnect', () => {
-				socket.broadcast.emit('logout', socket.name);
+				socket.broadcast.emit('logout', socket.nickname);
 				socket.disconnect();
 			});
 			
 			socket.on('chat', data => {
-				if (data.name === 'all') {
+				if (data.to === 'all') {
 					let message = {
 						from: {
 							name: socket.name,
@@ -199,16 +201,14 @@ app.get('/chat', (req, res) => {
 					};
 					io.emit('chat', message);
 				} else {
-					console.log(data);
-					console.log(login_ids);
-					if (login_ids[data.name]) {
+					if (login_ids[data.to]) {
 						let message = {
 							from: {
-								name: data.name
+								nickname: data.to
 							},
 							message: data.message
 						}
-						io.sockets.connected[login_ids[data.name]].emit('whisper', message);
+						io.sockets.connected[login_ids[data.nickname]].emit('whisper', message);
 					}
 				}
 			});
