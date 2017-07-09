@@ -1,6 +1,8 @@
+const express = require('express');
 const app = require('express')();
 const session = require('express-session');
 const path = require('path');
+const zlib = require('zlib');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const mkdirp = require('mkdirp');
@@ -19,9 +21,11 @@ let chat = {
 	chat_logs: '',
 }
 
+let filePath = [];
+
 let storage = multer.diskStorage({
 	destination: (req, file, cb) => {
-		cb(null, `${ req.session.user.email}/def`);
+		cb(null, `${ req.session.user.nickname }/def`);
 	},
 	filename: (req, file, cb) => {
 		cb(null, file.originalname);
@@ -162,7 +166,7 @@ app.get('/file', (req, res) => {
 	if (req.session.user) {
 		res.render('file.ejs', { user: req.session.user, });
 		
-		mkdirp(`./${ req.session.user.email }/def`, err => {
+		mkdirp(`./${ req.session.user.nickname }/def`, err => {
 			if (err) {
 				conosle.log(err);
 			}
@@ -173,7 +177,13 @@ app.get('/file', (req, res) => {
 });
 
 app.post('/file', upload.single('file'), (req, res) => {
-	console.log(req.file);
+	filePath.push(req.file.path);
+	res.redirect('/file/list');
+});
+
+app.get('/file/list', (req, res) => {
+	app.use('/lookup', express.static(`${ req.session.user.nickname }/def`));
+	res.render('file-list.ejs', { file: filePath, user: req.session.user });
 });
 
 
