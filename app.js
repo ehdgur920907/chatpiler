@@ -34,7 +34,7 @@ let userSchema = new Schema({
 	id: ObjectId,
     email: String,
     nickname: String,
-    password: String
+    password: String,
 });
 
 let User = mongoose.model('User', userSchema);
@@ -188,8 +188,8 @@ app.get('/chat', (req, res) => {
 				socket.login_id = data.nickname;
 				socket.nickname = data.nickname;
 				io.emit('login', {
-					nickname: data.nickname,
-					logs: chat.chat_logs
+					nickname: data.nickname
+//					logs: chat.chat_logs
 				});
 			});
 			
@@ -206,7 +206,7 @@ app.get('/chat', (req, res) => {
 						},
 						message: data.message
 					};
-					chat.chat_logs = data.logs;
+//					chat.chat_logs = data.logs;
 					io.emit('chat', message);
 				} else {
 					if (chat.login_ids[data.to]) {
@@ -215,9 +215,9 @@ app.get('/chat', (req, res) => {
 								nickname: data.to
 							},
 							message: data.message
-						}
-						chat.chat_logs = data.logs;
-						io.sockets.connected[login_ids[data.to]].emit('whisper', message);
+						};
+//						chat.chat_logs = data.logs;
+						io.to(chat.login_ids[data.to]).emit('whisper', message);
 					}
 				}
 			});

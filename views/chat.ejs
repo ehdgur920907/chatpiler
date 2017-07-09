@@ -40,14 +40,14 @@
 					<% if (!user) { %>
 						<li><a href="/signin">signin</a></li>
 						<li><a href="/signup">signup</a></li>
-					<% } %>
+						<% } %>
 				</ul>
 			</div>
 			<!-- /.navbar-collapse -->
 		</div>
 		<!-- /.container-fluid -->
 	</nav>
-	
+
 	<div class="container">
 		<div class="jumbotron" style="width: 70%; margin: auto;">
 			<div class="row">
@@ -56,14 +56,14 @@
 						<span class="glyphicon glyphicon-comment"></span>&nbsp;&nbsp;chat
 					</div>
 					<div class="panel-body" style="word-break: break-all; word-wrap: break-word; height: 300px; overflow: auto;">
-												<h4>welcome to chat service.</h4>
-							<hr />
+						<h4>welcome to chat service.</h4>
+						<hr />
 						<ul class="chat" style="list-style: none;">
 						</ul>
 					</div>
 					<div class="panel-footer">
 						<div class="input-group">
-<!--
+							<!--
 							<select class="form-control" id="select-box">
 							  <option>all</option>
 							</select>
@@ -85,15 +85,19 @@
 <script>
 	$(() => {
 		const socket = io.connect();
-		
+
 		socket.emit('login', {
 			nickname: $('#user-nickname').val()
 		});
-		
+
 		socket.on('login', data => {
-			$('.chat').append(`${ data.logs }<li style="color: red;"><strong>${ data.nickname }</strong> has joined.</li>`);
+//			if (data.nickname === $('#user-nickname').val()) {
+//				$('.chat').append(`${ data.logs }<li style="color: red;"><strong>${ data.nickname }</strong> has joined.</li>`);
+//			} else {
+				$('.chat').append(`<li style="color: red;"><strong>${ data.nickname }</strong> has joined.</li>`);
+//			}
 		});
-		
+
 		$('#btn-chat').click(() => {
 			if ($('#btn-input').val().length === 0) {
 				alert('input more than 1 words.');
@@ -116,28 +120,28 @@
 				}
 			}
 		});
-		
+
 		socket.on('chat', data => {
 			if (data.from.nickname === $('#user-nickname').val()) {
 				$('.chat').append(`<li style="color: blue;"><strong>${ data.from.nickname }</strong>: ${ data.message }</li>`);
-//				$('.panel-body').scrollTop(0);
-//				console.log('master');
+				//				$('.panel-body').scrollTop(0);
+				//				console.log('master');
 			} else {
 				$('.chat').append(`<li><strong>${ data.from.nickname }</strong>: ${ data.message }</li>`);
-//				$('.panel-body').scrollTop(0);
-//				console.log('slave');
+				//				$('.panel-body').scrollTop(0);
+				//				console.log('slave');
 			}
 		});
-		
+
 		socket.on('whisper', data => {
-			$('.chat').append(`<li style="color: gray;"><strong><span class="whisper" style="cursor: pointer">${ data.from.nickname }'s whisper: </span></strong>${ data.message }</li>`);				
+			$('.chat').append(`<li style="color: gray;"><strong><span class="whisper" style="cursor: pointer">whisper from ${ data.from.nickname }: </span></strong>${ data.message }</li>`);
 		});
-		
+
 		socket.on('logout', data => {
 			$('.chat').append(`<li style="color: red;"><strong>${ data }</strong> has left.</li>`);
 		});
-		
-		
+
+
 		$('#btn-input').keydown(key => {
 			if (key.keyCode === 13) {
 				if ($('#btn-input').val().length === 0) {
@@ -157,13 +161,15 @@
 							message: $('#btn-input').val(),
 							logs: $('.chat').html()
 						});
+						
+						$('.chat').append(`<li style="color: gray;"><strong><span class="whisper" style="cursor: pointer">whisper to ${ $('#user-nickname').val() }: </span></strong>${ $('#btn-input').val() }</li>`);
+						
 						$('#btn-input').val("");
 					}
 				}
 			}
 		});
-		
-		
 	});
 </script>
+
 </html>
