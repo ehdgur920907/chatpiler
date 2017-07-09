@@ -53,7 +53,7 @@
 			<div class="row">
 				<div class="panel panel-primary">
 					<div class="panel-heading">
-						<span class="glyphicon glyphicon-comment"></span>&nbsp;&nbsp;chat (<span id="user-count"></span>)
+						<span class="glyphicon glyphicon-comment"></span>&nbsp;&nbsp;chat
 					</div>
 					<div class="panel-body" style="word-break: break-all; word-wrap: break-word; height: 300px; overflow: auto;">
 												<h4>welcome to chat service.</h4>
@@ -103,12 +103,14 @@
 					socket.emit('chat', {
 						to: 'all',
 						message: $('#btn-input').val(),
+						logs: $('.chat').html()
 					});
 					$('#btn-input').val("");
 				} else {
 					socket.emit('chat', {
 						to: $('#select-box').val(),
-						message: $('#btn-input').val()
+						message: $('#btn-input').val(),
+						logs: $('.chat').html()
 					});
 					$('#btn-input').val("");
 				}
@@ -116,7 +118,7 @@
 		});
 		
 		socket.on('chat', data => {
-			if (data.from.email === $('#user-email').val()) {
+			if (data.from.nickname === $('#user-nickname').val()) {
 				$('.chat').append(`<li style="color: blue;"><strong>${ data.from.nickname }</strong>: ${ data.message }</li>`);
 //				$('.panel-body').scrollTop(0);
 //				console.log('master');
@@ -152,7 +154,8 @@
 					} else {
 						socket.emit('chat', {
 							to: $('#select-box').val(),
-							message: $('#btn-input').val()
+							message: $('#btn-input').val(),
+							logs: $('.chat').html()
 						});
 						$('#btn-input').val("");
 					}

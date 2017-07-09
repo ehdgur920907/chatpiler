@@ -14,8 +14,10 @@ mongoose.Promise = global.Promise;
 const Schema = mongoose.Schema;
 const ObjectId = Schema.ObjectId;
 
-let login_ids = {};
-let chat_logs = '';
+let chat = {
+	login_ids: {},
+	chat_logs: '',
+}
 
 let storage = multer.diskStorage({
 	destination: (req, file, cb) => {
@@ -182,17 +184,17 @@ app.get('/chat', (req, res) => {
 		
 		io.once('connection', socket => {
 			socket.on('login', data => {
-				login_ids[data.nickname] = socket.id;
+				chat.login_ids[data.nickname] = socket.id;
 				socket.login_id = data.nickname;
 				socket.nickname = data.nickname;
 				io.emit('login', {
 					nickname: data.nickname,
-					logs: chat_logs
+					logs: chat.chat_logs
 				});
 			});
 			
 			socket.on('disconnect', () => {
-				delete login_ids[socket.nickname];
+				delete chat.login_ids[socket.nickname];
 				io.emit('logout', socket.nickname);
 			});
 			
@@ -204,16 +206,17 @@ app.get('/chat', (req, res) => {
 						},
 						message: data.message
 					};
-					chat_logs = data.logs;
+					chat.chat_logs = data.logs;
 					io.emit('chat', message);
 				} else {
-					if (login_ids[data.to]) {
+					if (chat.login_ids[data.to]) {
 						let message = {
 							from: {
 								nickname: data.to
 							},
 							message: data.message
 						}
+						chat.chat_logs = data.logs;
 						io.sockets.connected[login_ids[data.to]].emit('whisper', message);
 					}
 				}
