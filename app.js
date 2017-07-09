@@ -8,12 +8,14 @@ const http = require('http').Server(app);
 const io = require('socket.io')(http);
 const fs = require('fs');
 const multer = require('multer');
+const cookieParser = require('cookie-parser');
 
 mongoose.Promise = global.Promise;
 const Schema = mongoose.Schema;
 const ObjectId = Schema.ObjectId;
 
 let login_ids = {};
+let chat_logs = '';
 
 let storage = multer.diskStorage({
 	destination: (req, file, cb) => {
@@ -38,6 +40,7 @@ let User = mongoose.model('User', userSchema);
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 
+app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(session({
   secret: '@$$%&ejdbvADFg^*(*%^',
@@ -182,13 +185,15 @@ app.get('/chat', (req, res) => {
 				login_ids[data.nickname] = socket.id;
 				socket.login_id = data.nickname;
 				socket.nickname = data.nickname;
-				socket.broadcast.emit('login', data.nickname);
+				io.emit('login', {
+					nickname: data.nickname,
+					logs: chat_logs
+				});
 			});
 			
-			socket.on('disconnect', (data) => {
+			socket.on('disconnect', () => {
 				delete login_ids[socket.nickname];
-				socket.broadcast.emit('logout', socket.nickname);
-				socket.disconnect();
+				io.emit('logout', socket.nickname);
 			});
 			
 			socket.on('chat', data => {
@@ -199,6 +204,7 @@ app.get('/chat', (req, res) => {
 						},
 						message: data.message
 					};
+					chat_logs = data.logs;
 					io.emit('chat', message);
 				} else {
 					if (login_ids[data.to]) {
