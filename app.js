@@ -1,8 +1,6 @@
 const express = require('express');
 const app = require('express')();
 const session = require('express-session');
-const path = require('path');
-const zlib = require('zlib');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const mkdirp = require('mkdirp');
@@ -10,7 +8,6 @@ const http = require('http').Server(app);
 const io = require('socket.io')(http);
 const fs = require('fs');
 const multer = require('multer');
-const cookieParser = require('cookie-parser');
 
 mongoose.Promise = global.Promise;
 const Schema = mongoose.Schema;
@@ -45,8 +42,7 @@ let User = mongoose.model('User', userSchema);
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 
-app.use(express.static(__dirname + '/public'));
-app.use(cookieParser());
+app.use(express.static(__dirname + '/code-mirror'));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(session({
   secret: '@$$%&ejdbvADFg^*(*%^',
@@ -163,7 +159,7 @@ app.get('/signout', (req, res) => {
 // 파일
 app.get('/file/upload', (req, res) => {
 	if (req.session.user) {
-		res.render('file.ejs', { user: req.session.user, });
+		res.render('file-upload.ejs', { user: req.session.user, });
 		
 		mkdirp(`./uploads/${ req.session.user.nickname }`, err => {
 			if (err) {
