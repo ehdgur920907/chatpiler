@@ -181,16 +181,20 @@ app.post('/file/upload', upload.single('file'), (req, res) => {
 });
 
 app.get('/file/list', (req, res) => {
-	User.findOne({ email: req.session.user.email }, (err, user) => {
-		if (err) {
-			console.log(err);
-		}
+	if (req.session.user) {
+		User.findOne({ email: req.session.user.email }, (err, user) => {
+			if (err) {
+				console.log(err);
+			}
 
-		res.render('file-list.ejs', {
-			file: user.file,
-			user: req.session.user
+			res.render('file-list.ejs', {
+				file: user.file,
+				user: req.session.user
+			});
 		});
-	});
+	} else {
+		res.render('signin.ejs');
+	}
 });
 
 app.get('/file/read/:name', (req, res) => {

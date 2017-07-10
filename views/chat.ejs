@@ -63,14 +63,9 @@
 						</ul>
 					</div>
 					<div class="panel-footer">
+						<input id="select-box" type="text" class="form-control" placeholder="whisper who?" autofocus>
 						<div class="input-group">
-							<!--
-							<select class="form-control" id="select-box">
-							  <option>all</option>
-							</select>
--->
-							<input id="select-box" type="text" class="form-control " placeholder="whisper who?" autofocus>
-							<input id="btn-input" type="text" class="form-control " placeholder="type your message." autofocus>
+							<input id="btn-input" type="text" class="form-control" placeholder="type your message." autofocus>
 							<span class="input-group-btn">
                             <button class="btn btn-warning btn" id="btn-chat">
                                 send</button>
@@ -125,12 +120,10 @@
 		socket.on('chat', data => {
 			if (data.from.nickname === $('#user-nickname').val()) {
 				$('.chat').append(`<li style="color: blue;"><strong>${ data.from.nickname }</strong>: ${ data.message }</li>`);
-				//				$('.panel-body').scrollTop(0);
-				//				console.log('master');
+				$(".panel-body").scrollTop($(".panel-body")[0].scrollHeight);
 			} else {
 				$('.chat').append(`<li><strong>${ data.from.nickname }</strong>: ${ data.message }</li>`);
-				//				$('.panel-body').scrollTop(0);
-				//				console.log('slave');
+				$(".panel-body").scrollTop($(".panel-body")[0].scrollHeight);
 			}
 		});
 
