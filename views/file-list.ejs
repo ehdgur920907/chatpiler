@@ -53,12 +53,12 @@
 				<hr>
 				<div class="list-group">
 					<% file.forEach(item => { %>
-						<a href="/lookup/<%= item.substring(item.lastIndexOf('/') + 1) %>" class="list-group-item">
+						<a href="/file/read/<%= item.substring(item.lastIndexOf('/') + 1) %>" class="list-group-item">
 							<%= item %>
 						</a>
 							<% }); %>
 				</div>
-				<a href="/file" class="btn btn-primary" role="button">upload</a>
+				<a href="/file" class="btn btn-primary" role="button">go upload</a>
 			</div>
 		</div>
 	</div>

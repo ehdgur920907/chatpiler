@@ -25,7 +25,7 @@ let filePath = [];
 
 let storage = multer.diskStorage({
 	destination: (req, file, cb) => {
-		cb(null, `${ req.session.user.nickname }/def`);
+		cb(null, `uploads/${ req.session.user.nickname }/def`);
 	},
 	filename: (req, file, cb) => {
 		cb(null, file.originalname);
@@ -46,6 +46,7 @@ let User = mongoose.model('User', userSchema);
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 
+app.use(express.static(__dirname + '/public'));
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(session({
@@ -166,7 +167,7 @@ app.get('/file', (req, res) => {
 	if (req.session.user) {
 		res.render('file.ejs', { user: req.session.user, });
 		
-		mkdirp(`./${ req.session.user.nickname }/def`, err => {
+		mkdirp(`./uploads/${ req.session.user.nickname }/def`, err => {
 			if (err) {
 				conosle.log(err);
 			}
@@ -182,8 +183,20 @@ app.post('/file', upload.single('file'), (req, res) => {
 });
 
 app.get('/file/list', (req, res) => {
-	app.use('/lookup', express.static(`${ req.session.user.nickname }/def`));
 	res.render('file-list.ejs', { file: filePath, user: req.session.user });
+});
+
+app.get('/file/read/:name', (req, res) => {
+	fs.readFile(`./uploads/${ req.session.user.nickname }/def/${ req.params.name }`, 'utf8', (err, data) =>{
+		if (err) {
+			console.log(err);
+		}
+		res.render('file-read.ejs', { user: req.session.user, data: data, name: req.params.name });
+	});
+});
+
+app.post('file/save/:name', (req, res) => {
+	console.log(req.body.code);
 });
 
 
