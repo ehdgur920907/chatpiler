@@ -87,11 +87,7 @@
 		});
 
 		socket.on('login', data => {
-//			if (data.nickname === $('#user-nickname').val()) {
-//				$('.chat').append(`${ data.logs }<li style="color: red;"><strong>${ data.nickname }</strong> has joined.</li>`);
-//			} else {
-				$('.chat').append(`<li style="color: red;"><strong>${ data.nickname }</strong> has joined.</li>`);
-//			}
+				$('.chat').append(`${ data.logs }<li style="color: red;"><strong>${ data.nickname }</strong> has joined.</li>`);
 		});
 
 		$('#btn-chat').click(() => {
@@ -112,6 +108,8 @@
 						message: $('#btn-input').val(),
 						logs: $('.chat').html()
 					});
+						
+					$('.chat').append(`<li style="color: gray;"><strong><span class="whisper" style="cursor: pointer">whisper to ${ $('#user-nickname').val() }: </span></strong>${ $('#btn-input').val() }</li>`);
 					$('#btn-input').val("");
 				}
 			}
@@ -142,7 +140,6 @@
 					alert('input more than 1 words.');
 				} else {
 					if ($('#select-box').val() === 'all') {
-						console.log($('.chat').html());
 						socket.emit('chat', {
 							to: 'all',
 							message: $('#btn-input').val(),

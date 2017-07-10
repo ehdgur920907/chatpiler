@@ -13,10 +13,7 @@ mongoose.Promise = global.Promise;
 const Schema = mongoose.Schema;
 const ObjectId = Schema.ObjectId;
 
-let chat = {
-	login_ids: {},
-	chat_logs: '',
-}
+let login_ids = {};
 
 let storage = multer.diskStorage({
 	destination: (req, file, cb) => {
@@ -34,6 +31,7 @@ let userSchema = new Schema({
     email: String,
     nickname: String,
     password: String,
+	chat: String,
 	file: [String]
 });
 
@@ -172,7 +170,7 @@ app.get('/file/upload', (req, res) => {
 });
 
 app.post('/file/upload', upload.single('file'), (req, res) => {
-	User.update({ email: req.session.user.email }, { $push: { file: req.file.path }}, (err) =>{
+	User.update({ email: req.session.user.email }, { $push: { file: req.file.path }}, (err) => {
 		if (err) {
 			console.log(err);
 		}
@@ -198,7 +196,7 @@ app.get('/file/list', (req, res) => {
 });
 
 app.get('/file/read/:name', (req, res) => {
-	fs.readFile(`./uploads/${ req.session.user.nickname }/${ req.params.name }`, 'utf8', (err, data) =>{
+	fs.readFile(`./uploads/${ req.session.user.nickname }/${ req.params.name }`, 'utf8', (err, data) => {
 		if (err) {
 			console.log(err);
 		}
@@ -227,17 +225,22 @@ app.get('/chat', (req, res) => {
 		
 		io.once('connection', socket => {
 			socket.on('login', data => {
-				chat.login_ids[data.nickname] = socket.id;
+				login_ids[data.nickname] = socket.id;
 				socket.login_id = data.nickname;
 				socket.nickname = data.nickname;
-				io.emit('login', {
-					nickname: data.nickname
-//					logs: chat.chat_logs
+				User.findOne({ email: req.session.user.email }, (err, user) => {
+					if (err) {
+						console.log(err);
+					}
+					io.emit('login', {
+						nickname: data.nickname,
+						logs: user.chat
+					});
 				});
 			});
 			
 			socket.on('disconnect', () => {
-				delete chat.login_ids[socket.nickname];
+				delete login_ids[socket.nickname];
 				io.emit('logout', socket.nickname);
 			});
 			
@@ -249,18 +252,26 @@ app.get('/chat', (req, res) => {
 						},
 						message: data.message
 					};
-//					chat.chat_logs = data.logs;
+					User.update({ email: req.session.user.email }, { chat: data.logs }, (err) => {
+						if (err) {
+							console.log(err);
+						}
+					});
 					io.emit('chat', message);
 				} else {
-					if (chat.login_ids[data.to]) {
+					if (login_ids[data.to]) {
 						let message = {
 							from: {
 								nickname: data.to
 							},
 							message: data.message
 						};
-//						chat.chat_logs = data.logs;
-						io.to(chat.login_ids[data.to]).emit('whisper', message);
+						User.update({ email: req.session.user.email }, { chat: data.logs }, (err) => {
+							if (err) {
+								console.log(err);
+							}
+						});
+						io.to(login_ids[data.to]).emit('whisper', message);
 					}
 				}
 			});
