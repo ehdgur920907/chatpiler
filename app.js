@@ -8,6 +8,7 @@ const http = require('http').Server(app);
 const io = require('socket.io')(http);
 const fs = require('fs');
 const multer = require('multer');
+const decompress = require('decompress');
 
 mongoose.Promise = global.Promise;
 const Schema = mongoose.Schema;
@@ -170,12 +171,28 @@ app.get('/file/upload', (req, res) => {
 });
 
 app.post('/file/upload', upload.single('file'), (req, res) => {
-	User.update({ email: req.session.user.email }, { $push: { file: req.file.path }}, (err) => {
-		if (err) {
-			console.log(err);
-		}
-	});
-	res.redirect('/file/list');
+	if (req.file.filename.substring(req.file.filename.length - 3) === 'zip' || req.file.filename.substring(req.file.filename.length - 3) === 'tar') {
+		decompress(`./uploads/${ req.session.user.nickname }/${ req.file.filename }`, `./uploads/${ req.session.user.nickname }`).then(files => {
+			files.forEach(item => {
+				if (item.type === 'file') {
+					console.log(item.path);
+					User.update({ email: req.session.user.email }, { $push: { file: `uploads/${ req.session.user.nickname }/${ item.path }` }}, (err) => {
+						if (err) {
+							console.log(err);
+						}
+					});
+				}
+			});
+			res.redirect('/file/list');
+		});
+	} else {
+		User.update({ email: req.session.user.email }, { $push: { file: req.file.path }}, (err) => {
+			if (err) {
+				console.log(err);
+			}
+			res.redirect('/file/list');	
+		});
+	}
 });
 
 app.get('/file/list', (req, res) => {
@@ -184,7 +201,6 @@ app.get('/file/list', (req, res) => {
 			if (err) {
 				console.log(err);
 			}
-
 			res.render('file-list.ejs', {
 				file: user.file,
 				user: req.session.user
@@ -196,14 +212,23 @@ app.get('/file/list', (req, res) => {
 });
 
 app.get('/file/read/:name', (req, res) => {
-	fs.readFile(`./uploads/${ req.session.user.nickname }/${ req.params.name }`, 'utf8', (err, data) => {
+	User.findOne({ email: req.session.user.email }, (err, user) => {
 		if (err) {
 			console.log(err);
 		}
-		res.render('file-read.ejs', {
-			user: req.session.user,
-			name: req.params.name,
-			data: data
+		user.file.forEach(item => {
+			if (item.substring(item.lastIndexOf('/') + 1) === req.params.name) {
+				fs.readFile(item, 'utf8', (err, data) => {
+					if (err) {
+						console.log(err);
+					}
+					res.render('file-read.ejs', {
+						user: req.session.user,
+						name: req.params.name,
+						data: data
+					});
+				});
+			}
 		});
 	});
 });
@@ -283,5 +308,5 @@ app.get('/chat', (req, res) => {
 
 http.listen(3000, () => {
     console.log('listen on port: 3000.');
-    mongoose.connect('mongodb://localhost/codigm', { useMongoClient: true });
+    mongoose.connect('mongodb://localhost/hello', { useMongoClient: true });
 });
