@@ -21,11 +21,9 @@ let chat = {
 	chat_logs: '',
 }
 
-let filePath = [];
-
 let storage = multer.diskStorage({
 	destination: (req, file, cb) => {
-		cb(null, `uploads/${ req.session.user.nickname }/def`);
+		cb(null, `uploads/${ req.session.user.nickname }`);
 	},
 	filename: (req, file, cb) => {
 		cb(null, file.originalname);
@@ -39,6 +37,7 @@ let userSchema = new Schema({
     email: String,
     nickname: String,
     password: String,
+	file: [String]
 });
 
 let User = mongoose.model('User', userSchema);
@@ -102,11 +101,11 @@ app.post('/signin', (req, res) => {
         if (signinUser.password !== user.password) {
             return res.render('signin.ejs');
         }
-        
-        req.session.user = user;
-        req.session.save(() => {
-            res.redirect('/welcome');
-        });
+		
+		req.session.user = user;
+		req.session.save(() => {
+			res.redirect('/welcome');
+		});
     });
 });
 
@@ -117,10 +116,10 @@ app.get('/signup', (req, res) => {
 });
 
 app.post('/signup', (req, res) => {
-    let user = new User({
+    let signupUser = new User({
         email: req.body.email,
         nickname: req.body.nickname,
-        password: req.body.password
+        password: req.body.password,
     });
     
 	User.findOne({ email: req.body.email }, (err, user) => {
@@ -130,28 +129,27 @@ app.post('/signup', (req, res) => {
 		
 		if (user) {
 			console.log('your email is already on.');
-			return res.render('signup.ejs')
-		}
-	});
-	
-	User.findOne({ nickname: req.body.nickname }, (err, user) => {
-		if (err) {
-			console.log(err);
+			return res.redirect('/signup');
 		}
 		
-		if (user) {
-			console.log('your nickname is already on.');
-			return res.render('signup.ejs');
-		}
-	});
+		User.findOne({ nickname: req.body.nickname }, (err, user) => {
+			if (err) {
+				console.log(err);
+			}
+
+			if (user) {
+				console.log('your nickname is already on.');
+				return res.redirect('/signup');
+			}
 	
-    user.save(err => {
-        if (err) {
-            conosle.log(err);
-        }
-        
-        res.redirect('/signin');
-    });
+			signupUser.save(err => {
+				if (err) {
+					conosle.log(err);
+				}
+				res.redirect('/signin');
+			});
+		});
+	});
 });
 
 
@@ -163,11 +161,11 @@ app.get('/signout', (req, res) => {
 
 
 // 파일
-app.get('/file', (req, res) => {
+app.get('/file/upload', (req, res) => {
 	if (req.session.user) {
 		res.render('file.ejs', { user: req.session.user, });
 		
-		mkdirp(`./uploads/${ req.session.user.nickname }/def`, err => {
+		mkdirp(`./uploads/${ req.session.user.nickname }`, err => {
 			if (err) {
 				conosle.log(err);
 			}
@@ -177,26 +175,48 @@ app.get('/file', (req, res) => {
 	}
 });
 
-app.post('/file', upload.single('file'), (req, res) => {
-	filePath.push(req.file.path);
+app.post('/file/upload', upload.single('file'), (req, res) => {
+	User.update({ email: req.session.user.email }, { $push: { file: req.file.path }}, (err) =>{
+		if (err) {
+			console.log(err);
+		}
+	});
 	res.redirect('/file/list');
 });
 
 app.get('/file/list', (req, res) => {
-	res.render('file-list.ejs', { file: filePath, user: req.session.user });
-});
-
-app.get('/file/read/:name', (req, res) => {
-	fs.readFile(`./uploads/${ req.session.user.nickname }/def/${ req.params.name }`, 'utf8', (err, data) =>{
+	User.findOne({ email: req.session.user.email }, (err, user) => {
 		if (err) {
 			console.log(err);
 		}
-		res.render('file-read.ejs', { user: req.session.user, data: data, name: req.params.name });
+
+		res.render('file-list.ejs', {
+			file: user.file,
+			user: req.session.user
+		});
 	});
 });
 
-app.post('file/save/:name', (req, res) => {
-	console.log(req.body.code);
+app.get('/file/read/:name', (req, res) => {
+	fs.readFile(`./uploads/${ req.session.user.nickname }/${ req.params.name }`, 'utf8', (err, data) =>{
+		if (err) {
+			console.log(err);
+		}
+		res.render('file-read.ejs', {
+			user: req.session.user,
+			name: req.params.name,
+			data: data
+		});
+	});
+});
+
+app.post('/file/save/:name', (req, res) => {
+	fs.writeFile(`./uploads/${ req.session.user.nickname }/${ req.params.name }`, req.body.code, 'utf8', (err) => {
+		if (err) {
+			console.log(err);
+		}
+		res.redirect(`/file/read/${ req.params.name }`);
+	});
 });
 
 
@@ -252,5 +272,5 @@ app.get('/chat', (req, res) => {
 
 http.listen(3000, () => {
     console.log('listen on port: 3000.');
-    mongoose.connect('mongodb://localhost/database', { useMongoClient: true });
+    mongoose.connect('mongodb://localhost/codigm', { useMongoClient: true });
 });

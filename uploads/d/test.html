@@ -3,7 +3,7 @@
 
 <head>
 	<meta charset="UTF-8">
-	<title>my</title>
+	<title>file read</title>
 	<!-- jQuery CDN -->
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 
@@ -11,6 +11,11 @@
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
+
+	<!-- CodeMirror -->
+	<script src="lib/codemirror.js"></script>
+	<link rel="stylesheet" href="lib/codemirror.css">
+	<script src="mode/javascript/javascript.js"></script>
 </head>
 
 <body>
@@ -32,15 +37,9 @@
 				<ul class="nav navbar-nav">
 				</ul>
 				<ul class="nav navbar-nav navbar-right">
-					<li><a href="/file/list">file list</a></li>
-					<li><a href="/file/upload">file upload</a></li>
+					<li><a href="/file">file</a></li>
 					<li><a href="/chat">chat</a></li>
 					<li><a href="/my">my</a></li>
-					<li><a href="/signout">signout</a></li>
-					<% if (!user) { %>
-						<li><a href="/signin">signin</a></li>
-						<li><a href="/signup">signup</a></li>
-					<% } %>
 				</ul>
 			</div>
 			<!-- /.navbar-collapse -->
@@ -48,31 +47,24 @@
 		<!-- /.container-fluid -->
 	</nav>
 	<div class="container">
-		<div class="col-md-6 col-md-offset-3">
-			<div class="jumbotron">
-				<h2 style="text-align: center;">my information</h2>
-				<hr>
-				<table class="table table-bordered" style="background-color: white;">
-					<thead>
-						<tr>
-							<th>email</th>
-							<td>
-								<%= user.email %>
-							</td>
-						</tr>
-					</thead>
-					<tbody>
-						<tr>
-							<th>nickname</th>
-							<td>
-								<%= user.nickname %>
-							</td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
+		<div class="jumbotron">
+			<h2 style="text-align: center;">file read</h2>
+			<hr>
+			<form action="/file/save/<%= name %>">
+				<textarea name="code" id="code"></textarea>
+				<input type="submit" class="btn btn-primary" value="save">
+			</form>
 		</div>
 	</div>
 </body>
+<script>
+	var textarea = document.getElementById('code');
+	var code = CodeMirror.fromTextArea(textarea, {
+		lineNumbers: true,
+		lineWrapping: true,
+		theme: "eclipse",
+		val: textarea.value
+	});
+</script>
 
 </html>

@@ -37,7 +37,8 @@
 				<ul class="nav navbar-nav">
 				</ul>
 				<ul class="nav navbar-nav navbar-right">
-					<li><a href="/file">file</a></li>
+					<li><a href="/file/list">file list</a></li>
+					<li><a href="/file">file upload</a></li>
 					<li><a href="/chat">chat</a></li>
 					<li><a href="/my">my</a></li>
 					<li><a href="/signout">signout</a></li>
@@ -54,11 +55,12 @@
 	<div class="container">
 		<div class="jumbotron">
 			<h2 style="text-align: center;">file read</h2>
+			<a href="/file/list" class="btn btn-default" role="button">list</a>
 			<hr>
 			<form action="/file/save/<%= name %>" method="post">
-				<textarea name="code" id="code"><%= data%></textarea>
+				<textarea name="code" id="code"><%= data %></textarea>
 				<br>
-				<input type="submit" class="btn btn-primary" value="save">
+				<input id="save" type="submit" class="btn btn-primary" value="save">
 			</form>
 		</div>
 	</div>
@@ -71,6 +73,14 @@
 		theme: "sublime",
 		val: textarea.value
 	});
+	
+	$(document).keydown((e) => {
+        if((e.ctrlKey || e.metaKey) && e.which == 83) {
+			$('#save').trigger('click');
+            event.preventDefault();
+            return false;
+        };
+    });
 </script>
 
 </html>
