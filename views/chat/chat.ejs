@@ -87,7 +87,11 @@
 		});
 
 		socket.on('login', data => {
+			if (data.logs === undefined) {
+				$('.chat').append(`<li style="color: red;"><strong>${ data.nickname }</strong> has joined.</li>`);
+			} else {
 				$('.chat').append(`${ data.logs }<li style="color: red;"><strong>${ data.nickname }</strong> has joined.</li>`);
+			}
 		});
 
 		$('#btn-chat').click(() => {

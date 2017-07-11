@@ -41,7 +41,7 @@ let User = mongoose.model('User', userSchema);
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 
-app.use(express.static(__dirname + '/code-mirror'));
+app.use(express.static(__dirname + '/views/codemirror'));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(session({
   secret: '@$$%&ejdbvADFg^*(*%^',
@@ -62,19 +62,19 @@ app.get('/', (req, res) => {
 
 // 환영 페이지
 app.get('/welcome', (req, res) => {
-    res.render('welcome.ejs', { user: req.session.user });
+    res.render('user/welcome.ejs', { user: req.session.user });
 });
 
 
 // 마이 페이지
 app.get('/my', (req, res) => {
-    res.render('my.ejs', { user: req.session.user });
+    res.render('user/my.ejs', { user: req.session.user });
 });
 
 
 // 로그인
 app.get('/signin', (req, res) => {
-    res.render('signin.ejs');
+    res.render('user/signin.ejs');
 });
 
 app.post('/signin', (req, res) => {
@@ -90,11 +90,11 @@ app.post('/signin', (req, res) => {
         
         if (!user) {
             console.log('cannot find user.');
-            return res.render('signin.ejs');
+            return res.render('user/signin.ejs');
         }
         
         if (signinUser.password !== user.password) {
-            return res.render('signin.ejs');
+            return res.render('user/signin.ejs');
         }
 		
 		req.session.user = user;
@@ -107,7 +107,7 @@ app.post('/signin', (req, res) => {
 
 // 회원가입
 app.get('/signup', (req, res) => {
-    res.render('signup.ejs');
+    res.render('user/signup.ejs');
 });
 
 app.post('/signup', (req, res) => {
@@ -158,7 +158,7 @@ app.get('/signout', (req, res) => {
 // 파일
 app.get('/file/upload', (req, res) => {
 	if (req.session.user) {
-		res.render('file-upload.ejs', { user: req.session.user, });
+		res.render('file/file-upload.ejs', { user: req.session.user, });
 		
 		mkdirp(`./uploads/${ req.session.user.nickname }`, err => {
 			if (err) {
@@ -166,7 +166,7 @@ app.get('/file/upload', (req, res) => {
 			}
 		});
 	} else {
-		res.render('signin.ejs');
+		res.render('user/signin.ejs');
 	}
 });
 
@@ -175,7 +175,6 @@ app.post('/file/upload', upload.single('file'), (req, res) => {
 		decompress(`./uploads/${ req.session.user.nickname }/${ req.file.filename }`, `./uploads/${ req.session.user.nickname }`).then(files => {
 			files.forEach(item => {
 				if (item.type === 'file') {
-					console.log(item.path);
 					User.update({ email: req.session.user.email }, { $push: { file: `uploads/${ req.session.user.nickname }/${ item.path }` }}, (err) => {
 						if (err) {
 							console.log(err);
@@ -201,13 +200,13 @@ app.get('/file/list', (req, res) => {
 			if (err) {
 				console.log(err);
 			}
-			res.render('file-list.ejs', {
+			res.render('file/file-list.ejs', {
 				file: user.file,
 				user: req.session.user
 			});
 		});
 	} else {
-		res.render('signin.ejs');
+		res.render('user/signin.ejs');
 	}
 });
 
@@ -222,7 +221,7 @@ app.get('/file/read/:name', (req, res) => {
 					if (err) {
 						console.log(err);
 					}
-					res.render('file-read.ejs', {
+					res.render('file/file-read.ejs', {
 						user: req.session.user,
 						name: req.params.name,
 						data: data
@@ -234,11 +233,20 @@ app.get('/file/read/:name', (req, res) => {
 });
 
 app.post('/file/save/:name', (req, res) => {
-	fs.writeFile(`./uploads/${ req.session.user.nickname }/${ req.params.name }`, req.body.code, 'utf8', (err) => {
+	User.findOne({ email: req.session.user.email }, (err, user) => {
 		if (err) {
 			console.log(err);
 		}
-		res.redirect(`/file/read/${ req.params.name }`);
+		user.file.forEach(item => {
+			if (item.substring(item.lastIndexOf('/') + 1) === req.params.name) {
+				fs.writeFile(item, req.body.code, 'utf8', err => {
+					if (err) {
+						console.log(err);
+					}
+					res.redirect(`/file/read/${ req.params.name }`);
+				});
+			}
+		});
 	});
 });
 
@@ -246,7 +254,7 @@ app.post('/file/save/:name', (req, res) => {
 // 채팅
 app.get('/chat', (req, res) => {
 	if (req.session.user) {
-		res.render('chat.ejs', { user: req.session.user });
+		res.render('chat/chat.ejs', { user: req.session.user });
 		
 		io.once('connection', socket => {
 			socket.on('login', data => {
@@ -279,7 +287,7 @@ app.get('/chat', (req, res) => {
 					};
 					User.update({ email: req.session.user.email }, { chat: data.logs }, (err) => {
 						if (err) {
-							console.log(err);
+							consoleㅇ.log(err);
 						}
 					});
 					io.emit('chat', message);
@@ -302,11 +310,11 @@ app.get('/chat', (req, res) => {
 			});
 		});
 	} else {
-		res.render('signin.ejs');
+		res.render('user/signin.ejs');
 	}
 })
 
 http.listen(3000, () => {
     console.log('listen on port: 3000.');
-    mongoose.connect('mongodb://localhost/hello', { useMongoClient: true });
+    mongoose.connect('mongodb://localhost/codigm', { useMongoClient: true });
 });

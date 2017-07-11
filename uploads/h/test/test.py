@@ -1,0 +1,2 @@
+// save
+print('hello, world!');
