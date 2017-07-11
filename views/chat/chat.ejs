@@ -26,7 +26,7 @@
 					class="icon-bar"></span> <span class="icon-bar"></span> <span
 					class="icon-bar"></span>
 			</button>
-				<a class="navbar-brand" href="/welcome"><span
+				<a class="navbar-brand" href="/user/welcome"><span
 				class="glyphicon glyphicon-home" aria-hidden="true"></span></a>
 			</div>
 
@@ -157,7 +157,7 @@
 							logs: $('.chat').html()
 						});
 						
-						$('.chat').append(`<li style="color: gray;"><strong><span class="whisper" style="cursor: pointer">whisper to ${ $('#user-nickname').val() }: </span></strong>${ $('#btn-input').val() }</li>`);
+						$('.chat').append(`<li style="color: gray;"><strong><span class="whisper" style="cursor: pointer">whisper to ${ $('#select-box').val() }: </span></strong>${ $('#btn-input').val() }</li>`);
 						
 						$('#btn-input').val("");
 					}
