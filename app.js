@@ -10,28 +10,10 @@ const fs = require('fs');
 const multer = require('multer');
 const decompress = require('decompress');
 const soap = require('soap');
+const Compile = require('ideone-npm');
 
-const url = 'http://ideone.com/api/1/service.wsdl';
-let code = '#include <stdio.h> int main() { printf("hello, world!\n"); return 0;}';
-let args = {
-	user: 'ehdgur920907', 
-	pass: 'mju12345',
-	code,
-	language: 11,
-	input: '',
-	run: true,
-	pvt: false
-}
+let compile = Compile('API_TOKEN');
 
-soap.createClient(url, (err, client) => {
-	client.createSubmission(args, (err, result) => {
-		console.log(args);
-		console.log(client);
-		console.log(JSON.stringify(result));
-	});
-});
-
-// Mongoose: mpromise (mongoose’s default promise library) is deprecated, plug in your own promise library instead: // http://mongoosejs.com/docs/promises.html” 경고창을 끄기 위해
 mongoose.Promise = global.Promise;
 
 // mongoose 스키마를 사용하고, 고유한 id 값을 위해
@@ -335,7 +317,42 @@ app.post('/file/save/:name', (req, res) => {
 	});
 });
 
+// 파일 컴파일
+app.post('/file/compile', (req, res) => {
+	let sourceCode = '';
+	let language = 0;
+	let testCases = '';
+	
+	if (req.body.name.substring(req.body.name.lastIndexOf('.') + 1) === 'c') {
+		sourceCode = req.body.code;
+		language = 11;
+		testCases = req.body.input;
 
+		compile.Run(sourceCode, language, testCases, (answer, error) => {
+			return res.json(answer);
+		});
+	}
+	
+	if (req.body.name.substring(req.body.name.lastIndexOf('.') + 1) === 'cpp') {
+		sourceCode = req.body.code;
+		language = 1;
+		testCases = req.body.input;
+		
+		compile.Run(sourceCode, language, testCases, (answer, error) => {
+			return res.json(answer);
+		});
+	}
+	
+	if (req.body.name.substring(req.body.name.lastIndexOf('.') + 1) === 'py') {
+		sourceCode = req.body.code;
+		language = 116;
+		testCases = req.body.input;
+		
+		compile.Run(sourceCode, language, testCases, (answer, error) => {
+			return res.json(answer);
+		});
+	} 
+});
 
 
 

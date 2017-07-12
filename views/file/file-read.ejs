@@ -61,9 +61,18 @@
 				<textarea name="code" id="code"><%= data %></textarea>
 				<br>
 				<input id="save" type="submit" class="btn btn-primary" value="save">
+				<a id="compile" class="btn btn-info" role="button">compile</a>
 			</form>
+			<hr>
+			<textarea id="input" class="form-control" rows="3" placeholder="input"></textarea>
+			<hr>
+			<div class="panel panel-default">
+			  <div class="panel-body" style="word-break: break-all; word-wrap: break-word; overflow: auto;">
+			  </div>
+			</div>
 		</div>
 	</div>
+	<input type="hidden" id="file-name" value="<%= name %>">
 </body>
 <script>
 	// 코드미러를 위한 옵션들
@@ -85,6 +94,24 @@
             return false;
         };
     });
+	
+	$('#compile').click(() => {
+		$.ajax({
+			url: '/file/compile',
+			type: 'post',
+			data: {
+				name: $('#file-name').val(),
+				code: $('#code').val(),
+				input: $('#input').val()
+			},
+			success: res => {
+				$('.panel-body').text(res);
+			},
+			error: err => {
+				console.log(err);
+			}
+		});
+	});
 </script>
 
 </html>
