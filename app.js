@@ -9,7 +9,6 @@ const io = require('socket.io')(http);
 const fs = require('fs');
 const multer = require('multer');
 const decompress = require('decompress');
-const soap = require('soap');
 const Compile = require('ideone-npm');
 
 let compile = Compile('API_TOKEN');
@@ -323,6 +322,7 @@ app.post('/file/compile', (req, res) => {
 	let language = 0;
 	let testCases = '';
 	
+	// 확장자가 c일 때
 	if (req.body.name.substring(req.body.name.lastIndexOf('.') + 1) === 'c') {
 		sourceCode = req.body.code;
 		language = 11;
@@ -333,6 +333,7 @@ app.post('/file/compile', (req, res) => {
 		});
 	}
 	
+	// 확장자가 cpp일 때
 	if (req.body.name.substring(req.body.name.lastIndexOf('.') + 1) === 'cpp') {
 		sourceCode = req.body.code;
 		language = 1;
@@ -343,6 +344,7 @@ app.post('/file/compile', (req, res) => {
 		});
 	}
 	
+	// 확장자가 py일 때
 	if (req.body.name.substring(req.body.name.lastIndexOf('.') + 1) === 'py') {
 		sourceCode = req.body.code;
 		language = 116;

@@ -64,8 +64,10 @@
 				<a id="compile" class="btn btn-info" role="button">compile</a>
 			</form>
 			<hr>
-			<textarea id="input" class="form-control" rows="3" placeholder="input"></textarea>
+			<h4>input</h4>
+			<textarea id="input" class="form-control" rows="3"></textarea>
 			<hr>
+			<h4>result</h4>
 			<div class="panel panel-default">
 			  <div class="panel-body" style="word-break: break-all; word-wrap: break-word; overflow: auto;">
 			  </div>
@@ -105,7 +107,7 @@
 				input: $('#input').val()
 			},
 			success: res => {
-				$('.panel-body').text(res);
+				$('.panel-body').text(res.output);
 			},
 			error: err => {
 				console.log(err);
