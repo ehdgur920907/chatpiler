@@ -256,6 +256,7 @@ app.get('/file/list', (req, res) => {
 			if (err) {
 				console.log(err);
 			}
+			
 			res.render('file/file-list.ejs', {
 				file: user.file,
 				user: req.session.user
@@ -383,6 +384,8 @@ app.get('/chat', (req, res) => {
 						});
 						// 그 사람에게 귓속말을 한다.
 						io.to(login_ids[data.to]).emit('whisper', message);
+					} else {
+						console.log('user is not on.');
 					}
 				}
 			});

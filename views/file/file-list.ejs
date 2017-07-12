@@ -54,9 +54,20 @@
 				<hr>
 				<div class="list-group">
 					<!-- 넘어온 파일의 경로 중 파일의 이름만 추출한다. -->
-					<% file.forEach(item => { %>
+					<% file.some((item, index) => { %>
+					<!-- DS_Store이라는 파일이 생기므로 제거해준다. !-->
+					<%
+						if ((item.substring(item.lastIndexOf('.') + 1)) === 'DS_Store') {
+							return false;
+						}
+					%>
 						<a href="/file/read/<%= item.substring(item.lastIndexOf('/') + 1) %>" class="list-group-item">
-							<%= item %>
+							<%
+								let refactoringFilePath = item.split('/');
+								refactoringFilePath.splice(0, 1);
+								refactoringFilePath.splice(0, 1);
+							%>
+							<%= refactoringFilePath.join('/'); %>
 						</a>
 							<% }); %>
 				</div>
