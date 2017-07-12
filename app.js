@@ -9,7 +9,27 @@ const io = require('socket.io')(http);
 const fs = require('fs');
 const multer = require('multer');
 const decompress = require('decompress');
+const soap = require('soap');
 
+const url = 'http://ideone.com/api/1/service.wsdl';
+let code = '#include <stdio.h> int main() { printf("hello, world!\n"); return 0;}';
+let args = {
+	user: 'ehdgur920907', 
+	pass: 'mju12345',
+	code,
+	language: 11,
+	input: '',
+	run: true,
+	pvt: false
+}
+
+soap.createClient(url, (err, client) => {
+	client.createSubmission(args, (err, result) => {
+		console.log(args);
+		console.log(client);
+		console.log(JSON.stringify(result));
+	});
+});
 
 // Mongoose: mpromise (mongoose’s default promise library) is deprecated, plug in your own promise library instead: // http://mongoosejs.com/docs/promises.html” 경고창을 끄기 위해
 mongoose.Promise = global.Promise;
