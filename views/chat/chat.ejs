@@ -41,7 +41,7 @@
 					<% if (!user) { %>
 						<li><a href="/user/signin">signin</a></li>
 						<li><a href="/user/signup">signup</a></li>
-						<% } %>
+					<% } %>
 				</ul>
 			</div>
 			<!-- /.navbar-collapse -->
@@ -63,7 +63,7 @@
 						</ul>
 					</div>
 					<div class="panel-footer">
-						<input id="select-box" type="text" class="form-control" placeholder="whisper who?" autofocus>
+						<input id="select-box" type="text" class="form-control" placeholder="all or nickname" autofocus>
 						<div class="input-group">
 							<input id="btn-input" type="text" class="form-control" placeholder="type your message." autofocus>
 							<span class="input-group-btn">
@@ -76,73 +76,93 @@
 			</div>
 		</div>
 	</div>
+	<!-- 사용자의 nickname 값을 서버로 보내기 위해 숨겨놓은 tag -->
 	<input type="hidden" id="user-nickname" value="<%= user.nickname %>">
 </body>
 <script>
 	$(() => {
 		const socket = io.connect();
-
+		
+		// 사용자가 로그인하면 nickname 값을 emit한다.
 		socket.emit('login', {
 			nickname: $('#user-nickname').val()
 		});
 
 		socket.on('login', data => {
 			if (data.logs === undefined) {
+				// 채팅 내역이 없기 때문에 채팅을 처음 시작한다. 또한, 입장은 빨간색이다.
 				$('.chat').append(`<li style="color: red;"><strong>${ data.nickname }</strong> has joined.</li>`);
+				$(".panel-body").scrollTop($(".panel-body")[0].scrollHeight);
 			} else {
+				// 채팅 내역이 있기 때문에 data.logs로 채팅내역을 찍고 시작한다. 또한, 입장은 빨간색이다.
 				$('.chat').append(`${ data.logs }<li style="color: red;"><strong>${ data.nickname }</strong> has joined.</li>`);
+				$(".panel-body").scrollTop($(".panel-body")[0].scrollHeight);
 			}
 		});
-
+		
+		// 클릭을 통한 데이터 전송
 		$('#btn-chat').click(() => {
 			if ($('#btn-input').val().length === 0) {
 				alert('input more than 1 words.');
 			} else {
+				// 전체채팅일 때
 				if ($('#select-box').val() === 'all') {
-					console.log($('.chat ~ li').html());
 					socket.emit('chat', {
 						to: 'all',
 						message: $('#btn-input').val(),
 						logs: $('.chat').html()
 					});
 					$('#btn-input').val("");
+				// 귓속말일 때
 				} else {
 					socket.emit('chat', {
 						to: $('#select-box').val(),
 						message: $('#btn-input').val(),
 						logs: $('.chat').html()
 					});
-						
+					
+					// 귓속말은 자기 자신에게 안 찍히므로, 찍힐 수 있게 임의로 달아준다.
 					$('.chat').append(`<li style="color: gray;"><strong><span class="whisper" style="cursor: pointer">whisper to ${ $('#user-nickname').val() }: </span></strong>${ $('#btn-input').val() }</li>`);
+					$(".panel-body").scrollTop($(".panel-body")[0].scrollHeight);
 					$('#btn-input').val("");
 				}
 			}
 		});
-
+		
 		socket.on('chat', data => {
 			if (data.from.nickname === $('#user-nickname').val()) {
+				// 자기자신이 채팅을 하면 -> 파란색
 				$('.chat').append(`<li style="color: blue;"><strong>${ data.from.nickname }</strong>: ${ data.message }</li>`);
+				// 스크롤 맨 아래로 유지
 				$(".panel-body").scrollTop($(".panel-body")[0].scrollHeight);
 			} else {
+				// 다른 사람이 채팅을 하면 -> 검은색
 				$('.chat').append(`<li><strong>${ data.from.nickname }</strong>: ${ data.message }</li>`);
+				// 스크롤 맨 아래로 유지
 				$(".panel-body").scrollTop($(".panel-body")[0].scrollHeight);
 			}
 		});
 
 		socket.on('whisper', data => {
+			// 귓속말이 오면 -> 회색
 			$('.chat').append(`<li style="color: gray;"><strong><span class="whisper" style="cursor: pointer">whisper from ${ data.from.nickname }: </span></strong>${ data.message }</li>`);
+			$(".panel-body").scrollTop($(".panel-body")[0].scrollHeight);
 		});
-
+		
+		// 어떤 사용자가 채팅방을 떠나면, 채팅방을 떠난다고 알려준다. -> 빨간색
 		socket.on('logout', data => {
 			$('.chat').append(`<li style="color: red;"><strong>${ data }</strong> has left.</li>`);
+			$(".panel-body").scrollTop($(".panel-body")[0].scrollHeight);
 		});
 
-
+		
+		// 엔터키 입력을 통한 메시지 전송
 		$('#btn-input').keydown(key => {
 			if (key.keyCode === 13) {
 				if ($('#btn-input').val().length === 0) {
 					alert('input more than 1 words.');
 				} else {
+					// 전체채팅일 때
 					if ($('#select-box').val() === 'all') {
 						socket.emit('chat', {
 							to: 'all',
@@ -150,6 +170,7 @@
 							logs: $('.chat').html()
 						});
 						$('#btn-input').val("");
+					// 귓속말일 때
 					} else {
 						socket.emit('chat', {
 							to: $('#select-box').val(),
@@ -157,8 +178,9 @@
 							logs: $('.chat').html()
 						});
 						
+						// 귓속말은 자기 자신에게 안 찍히므로, 찍힐 수 있게 임의로 달아준다.
 						$('.chat').append(`<li style="color: gray;"><strong><span class="whisper" style="cursor: pointer">whisper to ${ $('#select-box').val() }: </span></strong>${ $('#btn-input').val() }</li>`);
-						
+						$(".panel-body").scrollTop($(".panel-body")[0].scrollHeight);
 						$('#btn-input').val("");
 					}
 				}

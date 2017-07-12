@@ -40,7 +40,7 @@
 					<% if (!user) { %>
 						<li><a href="/user/signin">signin</a></li>
 						<li><a href="/user/signup">signup</a></li>
-						<% } %>
+					<% } %>
 				</ul>
 			</div>
 			<!-- /.navbar-collapse -->
@@ -53,6 +53,7 @@
 				<h2 style="text-align: center;">file list</h2>
 				<hr>
 				<div class="list-group">
+					<!-- 넘어온 파일의 경로 중 파일의 이름만 추출한다. -->
 					<% file.forEach(item => { %>
 						<a href="/file/read/<%= item.substring(item.lastIndexOf('/') + 1) %>" class="list-group-item">
 							<%= item %>
