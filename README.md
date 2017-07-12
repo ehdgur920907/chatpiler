@@ -5,7 +5,7 @@
  - 브라우저: Chrome, Safari, Firefox
  - terminal or cmd
 
-2. 실행 방법
+# 2. 실행 방법
  <프로젝트 실행>
  - 프로젝트를 실행하기 위해선 MongoDB 설치되어 있어야합니다.
  - cmd or termianl를 이용해 Mongo Server를 켭니다.
@@ -43,7 +43,7 @@
  - input이 필요하다면 input 안에 값을 넣습니다.
  - result 아래 결과 화면이 출력됩니다.
 
- 3. 구현된 기능들 짧게 소개
+ # 3. 구현된 기능들 짧게 소개
  <사용자>
  - 회원가입
  - 로그인
