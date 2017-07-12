@@ -1,5 +1,4 @@
-# codigm-homework
-1. 실행을 위한 환경 구축
+# 1. 실행을 위한 환경 구축
  - 데이터베이스: MongoDB v3.4.6
  - Node.js v6.11.1 LTS
  - 브라우저: Chrome, Safari, Firefox
@@ -8,11 +7,11 @@
 # 2. 실행 방법
  
 <프로젝트 실행>
- - 프로젝트를 실행하기 위해선 MongoDB 설치되어 있어야합니다.
+ - 프로젝트를 실행하기 위해선 Node.js와 MongoDB가 설치되어 있어야합니다.
  - cmd or termianl를 이용해 Mongo Server를 켭니다.
  - cmd or terminal을 이용해 프로젝트로 이동합니다.
  - node app.js로 서버를 실행시킵니다.
- - localhost:3000로 이동하여 프로젝트를 시작합니다.
+ - localhost:3000으로 이동하여 프로젝트를 시작합니다.
 
 <사용자>
  - 어느 메뉴를 누르든 일단 로그인을 해야합니다.
@@ -45,6 +44,7 @@
  - result 아래 결과 화면이 출력됩니다.
 
  # 3. 구현된 기능들 짧게 소개
+ 
  <사용자>
  - 회원가입
  - 로그인
