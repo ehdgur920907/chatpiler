@@ -1,7 +1,7 @@
 # 1. 실행을 위한 환경 구축
- - 데이터베이스: MongoDB v3.4.6
+ - MongoDB v3.4.6
  - Node.js v6.11.1 LTS
- - 브라우저: Chrome, Safari, Firefox
+ - Chrome, Safari, Firefox
  - terminal or cmd
 
 # 2. 실행 방법
