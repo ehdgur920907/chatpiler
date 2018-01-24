@@ -107,7 +107,9 @@
 				input: $('#input').val()
 			},
 			success: res => {
-				$('.panel-body').text(res.output);
+				console.log(res);
+				$('.panel-body').text(`${ res.cmpinfo }${ res.output }`);
+				$(".panel-body").scrollTop($(".panel-body")[0].scrollHeight);
 			},
 			error: err => {
 				console.log(err);

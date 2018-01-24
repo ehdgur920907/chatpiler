@@ -11,8 +11,9 @@ const multer = require('multer');
 const decompress = require('decompress');
 const Compile = require('ideone-npm');
 
-let compile = Compile('API_TOKEN');
-
+// “Mongoose: mpromise (mongoose’s default promise library) is deprecated,
+// plug in your own promise library instead: http://mongoosejs.com/docs/promises.html”
+// 경고창을 띄우지 않기 위해
 mongoose.Promise = global.Promise;
 
 // mongoose 스키마를 사용하고, 고유한 id 값을 위해
@@ -71,11 +72,11 @@ app.use(session({
 
 // 기본 페이지
 app.get('/', (req, res) => {
-    if (req.session.user) {
-        res.render('index.ejs', { user: req.session.user });
-    } else {
-        res.render('index.ejs');
-    }
+  if (req.session.user) {
+    res.render('index.ejs', { user: req.session.user });
+  } else {
+    res.render('index.ejs');
+  }
 });
 
 
@@ -107,34 +108,35 @@ app.get('/user/signin', (req, res) => {
 
 app.post('/user/signin', (req, res) => {
 	// 입력한 로그인 값을 받아온다.
-    let signinUser = {
-        email: req.body.email,
-        password: req.body.password
-    };
+  let signinUser = {
+      email: req.body.email,
+      password: req.body.password
+  };
     
 	// 데이터베이스에서 이메일을 통해 입력한 로그인 값의 이메일을 검색한다.
-    User.findOne({ email: signinUser.email }, (err, user) => {
-        if (err) {
-            console.log(err);
-        }
-        
+	User.findOne({ email: signinUser.email }, (err, user) => {
+    if (err) {
+      console.log(err);
+    }
+      
 		// 데이터가 없다. 즉, 회원가입이 안 돼 있다.
-        if (!user) {
-            console.log('cannot find user.');
-            return res.render('user/signin.ejs');
-        }
-        
+    if (!user) {
+      console.log('cannot find user.');
+      return res.render('user/signin.ejs');
+    }
+      
 		// 데이터가 있지만, 비밀번호가 틀리다.
-        if (signinUser.password !== user.password) {
-            return res.render('user/signin.ejs');
-        }
+    if (signinUser.password !== user.password) {
+        return res.render('user/signin.ejs');
+    }
 		
 		// 데이터도 있고, 비밀번호도 맞으면 세션에 검색한 user 객체를 넣어주고 저장한다.
 		req.session.user = user;
+		
 		req.session.save(() => {
 			res.redirect('/user/welcome');
 		});
-    });
+  });
 });
 
 
@@ -148,11 +150,11 @@ app.get('/user/signup', (req, res) => {
 
 app.post('/user/signup', (req, res) => {
 	// 입력한 회원가입 값을 받아온다.
-    let signupUser = new User({
-        email: req.body.email,
-        nickname: req.body.nickname,
-        password: req.body.password,
-    });
+  let signupUser = new User({
+    email: req.body.email,
+    nickname: req.body.nickname,
+    password: req.body.password,
+  });
     
 	// 입력한 회원가입 값 중 이메일 값을 통해 회원을 검색한다.
 	User.findOne({ email: req.body.email }, (err, user) => {
@@ -249,6 +251,10 @@ app.post('/file/upload', upload.single('file'), (req, res) => {
 	}
 });
 
+
+
+
+
 // 파일 리스트
 app.get('/file/list', (req, res) => {
 	// 사용자의 데이터베이스에서 file의 데이터 배열을 찾아서 넘겨준다.
@@ -294,6 +300,10 @@ app.get('/file/read/:name', (req, res) => {
 	});
 });
 
+
+
+
+
 // 파일 저장
 app.post('/file/save/:name', (req, res) => {
 	// 사용자의 이메일을 통해 데이터베이스를 검색한다.
@@ -316,6 +326,10 @@ app.post('/file/save/:name', (req, res) => {
 	});
 });
 
+
+
+
+
 // 파일 컴파일
 app.post('/file/compile', (req, res) => {
 	let sourceCode = '';
@@ -324,10 +338,11 @@ app.post('/file/compile', (req, res) => {
 	
 	// 확장자가 c일 때
 	if (req.body.name.substring(req.body.name.lastIndexOf('.') + 1) === 'c') {
+		let compile = Compile('aa8bcc27126d339867499d88d37edc53');
 		sourceCode = req.body.code;
-		language = 11;
+		language = 'C';
 		testCases = req.body.input;
-
+		
 		compile.Run(sourceCode, language, testCases, (answer, error) => {
 			return res.json(answer);
 		});
@@ -335,8 +350,9 @@ app.post('/file/compile', (req, res) => {
 	
 	// 확장자가 cpp일 때
 	if (req.body.name.substring(req.body.name.lastIndexOf('.') + 1) === 'cpp') {
+		let compile = Compile('aa8bcc27126d339867499d88d37edc53');
 		sourceCode = req.body.code;
-		language = 1;
+		language = 'Cpp';
 		testCases = req.body.input;
 		
 		compile.Run(sourceCode, language, testCases, (answer, error) => {
@@ -346,8 +362,9 @@ app.post('/file/compile', (req, res) => {
 	
 	// 확장자가 py일 때
 	if (req.body.name.substring(req.body.name.lastIndexOf('.') + 1) === 'py') {
+		let compile = Compile('aa8bcc27126d339867499d88d37edc53');
 		sourceCode = req.body.code;
-		language = 116;
+		language = 'Python';
 		testCases = req.body.input;
 		
 		compile.Run(sourceCode, language, testCases, (answer, error) => {
@@ -355,6 +372,8 @@ app.post('/file/compile', (req, res) => {
 		});
 	} 
 });
+
+
 
 
 
@@ -436,5 +455,5 @@ app.get('/chat', (req, res) => {
 
 http.listen(3000, () => {
     console.log('listen on port: 3000.');
-    mongoose.connect('mongodb://localhost/codigm', { useMongoClient: true });
+    mongoose.connect('mongodb://localhost/test', { useMongoClient: true });
 });

@@ -61,15 +61,15 @@
 							return false;
 						}
 					%>
-						<a href="/file/read/<%= item.substring(item.lastIndexOf('/') + 1) %>" class="list-group-item">
-							<%
-								let refactoringFilePath = item.split('/');
-								refactoringFilePath.splice(0, 1);
-								refactoringFilePath.splice(0, 1);
-							%>
-							<%= refactoringFilePath.join('/'); %>
-						</a>
-							<% }); %>
+					<a href="/file/read/<%= item.substring(item.lastIndexOf('/') + 1) %>" class="list-group-item">
+					<%
+						let refactoringFilePath = item.split('/');
+						refactoringFilePath.splice(0, 1);
+						refactoringFilePath.splice(0, 1);
+					%>
+					<%= refactoringFilePath.join('/'); %>
+					</a>
+					<% }); %>
 				</div>
 				<a href="/file/upload" class="btn btn-primary" role="button">upload</a>
 			</div>
